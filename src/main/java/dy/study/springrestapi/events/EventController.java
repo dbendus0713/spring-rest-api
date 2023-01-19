@@ -1,6 +1,8 @@
 package dy.study.springrestapi.events;
 
 
+import org.modelmapper.ModelMapper;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -19,16 +21,18 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 public class EventController {
 
   private final EventRepository eventRepository;
+  private final ModelMapper modelMapper;
 
-  public EventController(EventRepository eventRepository) {
+  public EventController(EventRepository eventRepository, ModelMapper modelMapper) {
     this.eventRepository = eventRepository;
+    this.modelMapper = modelMapper;
   }
 
   @PostMapping
-  public ResponseEntity createEntity(@RequestBody Event event) {
+  public ResponseEntity createEntity(@RequestBody EventDto eventDto) {
+    Event event = modelMapper.map(eventDto, Event.class);
     Event newEvent = this.eventRepository.save(event);
     URI createURi = linkTo(EventController.class).slash(newEvent.getId()).toUri();
-    event.setId(10);
-    return ResponseEntity.created(createURi).body(event);
+    return ResponseEntity.created(createURi).body(newEvent);
   }
 }
