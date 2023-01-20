@@ -107,4 +107,37 @@ public class EventControllerTets {
     ;
   }
 
+  @Test
+  public void createEvent_Bad_Request_Empty_Input() throws Exception {
+    EventDto eventDto = EventDto.builder().build();
+    this.mockMvc.perform(post("/api/events")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(this.objectMapper.writeValueAsString(eventDto))
+        )
+        .andExpect(status().isBadRequest())
+    ;
+  }
+
+  @Test
+  public void createEvent_Bad_Request_Wrong_Input() throws Exception {
+    EventDto eventDto = EventDto.builder()
+        .name("name")
+        .description("description")
+        .location("gangnam")
+        .beginEnrollmentDateTime(LocalDateTime.of(2023, 1, 18, 13, 41))
+        .closeEnrollmentDateTime(LocalDateTime.of(2023, 1, 19, 13, 41))
+        .beginEventDateTime(LocalDateTime.of(2023, 1, 22, 13, 41))
+        .endEventDateTime(LocalDateTime.of(2023, 1, 21, 13, 41))
+        .basePrice(1200)
+        .maxPrice(300)
+        .limitOfEnrollment(100)
+        .build();
+
+    this.mockMvc.perform(post("/api/events")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(this.objectMapper.writeValueAsString(eventDto))
+        )
+        .andExpect(status().isBadRequest())
+    ;
+  }
 }
