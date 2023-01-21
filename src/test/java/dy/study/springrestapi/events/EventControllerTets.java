@@ -1,6 +1,7 @@
 package dy.study.springrestapi.events;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dy.study.springrestapi.common.TestDescription;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -39,6 +40,7 @@ public class EventControllerTets {
 //  EventRepository eventRepository;
 
   @Test
+  @TestDescription("정상적으로 이벤트 생성하는 테스트") //junit5에선 제공됨.
   public void createEvent() throws Exception {
     EventDto event = EventDto.builder()
         .name("name")
@@ -75,6 +77,7 @@ public class EventControllerTets {
   }
 
   @Test
+  @TestDescription("입력받을 수 없는 값을 사용한 경우에 에러가 발생하는 테스트")
   public void createEvent_Bad_Requset () throws Exception {
     Event event = Event.builder()
         .id(100)
@@ -108,6 +111,7 @@ public class EventControllerTets {
   }
 
   @Test
+  @TestDescription("입력값이 비어있는 경우에 에러가 발생하는 테스트")
   public void createEvent_Bad_Request_Empty_Input() throws Exception {
     EventDto eventDto = EventDto.builder().build();
     this.mockMvc.perform(post("/api/events")
@@ -119,6 +123,7 @@ public class EventControllerTets {
   }
 
   @Test
+  @TestDescription("입력값 체크 에러가 발생하는 테스트")
   public void createEvent_Bad_Request_Wrong_Input() throws Exception {
     EventDto eventDto = EventDto.builder()
         .name("name")
