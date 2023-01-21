@@ -123,7 +123,7 @@ public class EventControllerTets {
   }
 
   @Test
-  @TestDescription("입력값 체크 에러가 발생하는 테스트")
+  @TestDescription("입력값이 잘못된 경우 에러가 발생하는 테스트")
   public void createEvent_Bad_Request_Wrong_Input() throws Exception {
     EventDto eventDto = EventDto.builder()
         .name("name")
@@ -142,7 +142,13 @@ public class EventControllerTets {
             .contentType(MediaType.APPLICATION_JSON)
             .content(this.objectMapper.writeValueAsString(eventDto))
         )
+        .andDo(print())
         .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$[0].objectName").exists())
+//        .andExpect(jsonPath("$[0].field").exists())
+        .andExpect(jsonPath("$[0].defaultMessage").exists())
+        .andExpect(jsonPath("$[0].code").exists())
+//        .andExpect(jsonPath("$[0].rejectedValue").exists())
     ;
   }
 }
