@@ -86,14 +86,15 @@ public class EventControllerTets {
         .andExpect(jsonPath("free").value(false))
         .andExpect(jsonPath("offline").value(true))
         .andExpect(jsonPath("eventStatus").value(EventStatus.DRAFT.name() ))
-        .andExpect(jsonPath("_links.self").exists())
-        .andExpect(jsonPath("_links.query-events").exists())
-        .andExpect(jsonPath("_links.update-event").exists())
+//        .andExpect(jsonPath("_links.self").exists())
+//        .andExpect(jsonPath("_links.query-events").exists())
+//        .andExpect(jsonPath("_links.update-event").exists())
         .andDo(document("create-event",
             links(
                 linkWithRel("self").description("link to self"),
                 linkWithRel("query-events").description("link to query events"),
-                linkWithRel("update-event").description("link to update an existing")
+                linkWithRel("update-event").description("link to update an existing"),
+                linkWithRel("profile").description("link to profile")
             ),
             requestHeaders(
                 headerWithName(HttpHeaders.ACCEPT).description("accept header"),
@@ -113,7 +114,9 @@ public class EventControllerTets {
             ),
             // relaxed는 정확한 문서를 만들 수 없다.
             // relaxed는 문서 일부분만 테스트 가능하다.
-            relaxedResponseFields(
+            responseFields(
+//            relaxedResponseFields(
+                fieldWithPath("id").description("od of new event"),
                 fieldWithPath("name").description("Name of new event"),
                 fieldWithPath("description").description("description of new event"),
                 fieldWithPath("beginEnrollmentDateTime").description("date time of begin of new event"),
@@ -126,7 +129,13 @@ public class EventControllerTets {
                 fieldWithPath("location").description("location"),
                 fieldWithPath("free").description("it tells if this event is free or not"),
                 fieldWithPath("offline").description("it tells if event is offline or not"),
-                fieldWithPath("eventStatus").description("event status"))
+                fieldWithPath("eventStatus").description("event status"),
+                //not relaxedRes~R
+                fieldWithPath("_links.self.href").description("event status"),
+                fieldWithPath("_links.query-events.href").description("event status"),
+                fieldWithPath("_links.update-event.href").description("event status"),
+                fieldWithPath("_links.profile.href").description("link to profile")
+                )
         ))
     ;
   }
