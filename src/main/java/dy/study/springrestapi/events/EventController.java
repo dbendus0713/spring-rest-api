@@ -1,5 +1,6 @@
 package dy.study.springrestapi.events;
 
+import dy.study.springrestapi.common.ErrorsEntityModel;
 import org.modelmapper.ModelMapper;
 import org.springframework.hateoas.Links;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
@@ -33,11 +34,13 @@ public class EventController {
   @PostMapping
   public ResponseEntity createEntity(@RequestBody @Valid EventDto eventDto, Errors errors) {
     if (errors.hasErrors()) {
-      return ResponseEntity.badRequest().body(errors);
+//      return ResponseEntity.badRequest().body(errors);
+      return badRequest(errors);
     }
     eventValidator.validate(eventDto, errors);
     if (errors.hasErrors()) {
-      return ResponseEntity.badRequest().body(errors);
+//      return ResponseEntity.badRequest().body(errors);
+      return badRequest(errors);
     }
 
     Event event = modelMapper.map(eventDto, Event.class);
@@ -50,5 +53,9 @@ public class EventController {
 //    eventResource.add(selfLink.withRel("update-event"));
 //    eventResource.add(selfLink.withSelfRel());
     return ResponseEntity.created(createURi).body(eventResource);
+  }
+
+  private ResponseEntity badRequest(Errors errors) {
+      return ResponseEntity.badRequest().body(ErrorsEntityModel.modelOf(errors));
   }
 }
