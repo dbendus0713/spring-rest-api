@@ -1,6 +1,8 @@
 package dy.study.springrestapi.events;
 
+import dy.study.springrestapi.common.ApiType;
 import dy.study.springrestapi.common.ErrorsEntityModel;
+import org.apache.coyote.Response;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -11,13 +13,11 @@ import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.Errors;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.net.URI;
+import java.util.Optional;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 
@@ -35,6 +35,19 @@ public class EventController {
     this.eventValidator = eventValidator;
   }
 
+  @GetMapping("/{id}")
+  public ResponseEntity selectEvent(@PathVariable Integer id) {
+    Optional<Event> optionalEvent = this.eventRepository.findById(id);
+    if (optionalEvent.isEmpty()) {
+      return ResponseEntity.notFound().build();
+    }
+    Event event = optionalEvent.get();
+    WebMvcLinkBuilder selfLink = linkTo(EventController.class).slash(event.getId());
+    URI createURi = selfLink.toUri();
+    EventEntityModel eventResource = new EventEntityModel(event, ApiType.FIND);
+    return ResponseEntity.ok().body(eventResource);
+  }
+
   @GetMapping
   public ResponseEntity selectEvents(Pageable pageable, PagedResourcesAssembler<Event> assembler) {
 
@@ -43,7 +56,7 @@ public class EventController {
       return new EventResource(e);
     });
     pagedResources.add(Link.of("/docs/index.html#resources-events-list", LinkRelation.of("profile")));
-
+    //spread
 //    var pagedResources = assembler.toModel(page, new RepresentationModelAssembler<Event, RepresentationModel<?>>() {
 //      @Override
 //      public RepresentationModel<?> toModel(Event entity) {
@@ -71,7 +84,7 @@ public class EventController {
     Event newEvent = this.eventRepository.save(event);
     WebMvcLinkBuilder selfLink = linkTo(EventController.class).slash(newEvent.getId());
     URI createURi = selfLink.toUri();
-    EventEntityModel eventResource = new EventEntityModel(newEvent);
+    EventEntityModel eventResource = new EventEntityModel(newEvent, ApiType.CREATE);
 //    eventResource.add(linkTo(EventController.class).withRel("query-events"));
 //    eventResource.add(selfLink.withRel("update-event"));
 //    eventResource.add(selfLink.withSelfRel());

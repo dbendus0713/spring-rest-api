@@ -292,12 +292,38 @@ public class EventControllerTets {
     ;
   }
 
-  private void generateEvent(int index) {
+  @Test
+  @TestDescription("event 조회시 없을때")
+  public void getEventException404() throws Exception {
+    //create
+    //when then
+    this.mockMvc.perform(get("/api/events/{id}", 99))
+        .andExpect(status().isNotFound())
+    ;
+  }
+  @Test
+  @TestDescription("event 조회")
+  public void getEvent() throws Exception {
+    //create
+    Event event = this.generateEvent(100);
+    //when then
+    this.mockMvc.perform(get("/api/events/{id}", event.getId()))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("name").exists())
+        .andExpect(jsonPath("id").exists())
+        .andExpect(jsonPath("_links.self").exists())
+        .andExpect(jsonPath("_links.profile").exists())
+        .andDo(document("get-an-event"))
+    ;
+  }
+
+  private Event generateEvent(int index) {
     Event event = Event.builder()
         .name("evet " + index)
         .description("test event " + index)
         .build();
     event.update();
     this.eventRepository.save(event);
+    return event;
   }
 }
