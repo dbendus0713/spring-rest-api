@@ -1,6 +1,7 @@
 package dy.study.springrestapi.events;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dy.study.springrestapi.common.BaseControllerTest;
 import dy.study.springrestapi.common.RestDocsConfiguration;
 import dy.study.springrestapi.common.TestDescription;
 import org.hamcrest.Matchers;
@@ -41,25 +42,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@RunWith(SpringRunner.class)
-//@WebMvcTest
-@SpringBootTest
-@AutoConfigureMockMvc
-@AutoConfigureRestDocs
-@Import(RestDocsConfiguration.class)
-@ActiveProfiles("test")
-public class EventControllerTets {
-
-  @Autowired
-  MockMvc mockMvc;
-
-  @Autowired
-  ObjectMapper objectMapper;
-
-  @Autowired
-  ModelMapper modelMapper;
-
-//  @MockBean
+public class EventControllerTets extends BaseControllerTest {
+  //  @MockBean
   @Autowired
   EventRepository eventRepository;
 
