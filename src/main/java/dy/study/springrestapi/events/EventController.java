@@ -90,6 +90,29 @@ public class EventController {
 //    eventResource.add(selfLink.withSelfRel());
     return ResponseEntity.created(createURi).body(eventResource);
   }
+  @PutMapping("/{id}")
+  public ResponseEntity createEntity(@PathVariable Integer id,
+                                     @RequestBody @Valid EventDto eventDto, Errors errors) {
+    if (errors.hasErrors()) {
+      return badRequest(errors);
+    }
+    eventValidator.validate(eventDto, errors);
+    if (errors.hasErrors()) {
+      return badRequest(errors);
+    }
+    Optional<Event> foundEvent = eventRepository.findById(id);
+    if (foundEvent.isEmpty()) {
+      return ResponseEntity.notFound().build();
+    }
+
+    this.modelMapper.map(eventDto, foundEvent.get());
+
+    Event updateEvent = this.eventRepository.save(foundEvent.get());
+    WebMvcLinkBuilder selfLink = linkTo(EventController.class).slash(updateEvent.getId());
+    URI createURi = selfLink.toUri();
+    EventEntityModel eventResource = new EventEntityModel(updateEvent, ApiType.CREATE);
+    return ResponseEntity.ok(eventResource);
+  }
 
   private ResponseEntity badRequest(Errors errors) {
       return ResponseEntity.badRequest().body(ErrorsEntityModel.modelOf(errors));

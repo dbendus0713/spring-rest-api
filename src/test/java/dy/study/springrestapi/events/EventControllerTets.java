@@ -7,6 +7,7 @@ import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -31,6 +32,7 @@ import static org.springframework.restdocs.headers.HeaderDocumentation.requestHe
 import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.linkWithRel;
 import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.links;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.put;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.requestParameters;
@@ -53,6 +55,9 @@ public class EventControllerTets {
 
   @Autowired
   ObjectMapper objectMapper;
+
+  @Autowired
+  ModelMapper modelMapper;
 
 //  @MockBean
   @Autowired
@@ -317,10 +322,72 @@ public class EventControllerTets {
     ;
   }
 
+  @Test
+  @TestDescription("event update 200")
+  public void updateEvent() throws Exception {
+    //create
+    Event event = this.generateEvent(100);
+    EventDto eventDto = this.modelMapper.map(event, EventDto.class);
+    String newName = "new name";
+    eventDto.setName(newName);
+    //when then
+    this.mockMvc.perform(put("/api/events/{id}", event.getId())
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaTypes.HAL_JSON)
+            .content(objectMapper.writeValueAsString(eventDto)))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("name").exists())
+        .andExpect(jsonPath("id").exists())
+        .andExpect(jsonPath("name").value(newName))
+        .andExpect(jsonPath("_links.self").exists())
+        .andExpect(jsonPath("_links.profile").exists())
+        .andDo(document("update-an-event"))
+    ;
+  }
+
+  @Test
+  @TestDescription("event update 400")
+  public void updateEvent400() throws Exception {
+    //create
+    Event event = this.generateEvent(100);
+    EventDto eventDto = new EventDto();
+    this.mockMvc.perform(put("/api/events/{id}", event.getId())
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaTypes.HAL_JSON)
+            .content(objectMapper.writeValueAsString(eventDto)))
+        .andExpect(status().isBadRequest())
+    ;
+  }
+
+  @Test
+  @TestDescription("event update 404")
+  public void updateEvent404() throws Exception {
+    //create
+    Event event = this.generateEvent(100);
+    EventDto eventDto = this.modelMapper.map(event, EventDto.class);
+    String newName = "new name";
+    eventDto.setName(newName);
+    this.mockMvc.perform(put("/api/events/{id}", 9870123)
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaTypes.HAL_JSON)
+            .content(objectMapper.writeValueAsString(eventDto)))
+        .andExpect(status().isNotFound())
+    ;
+  }
+
   private Event generateEvent(int index) {
     Event event = Event.builder()
         .name("evet " + index)
-        .description("test event " + index)
+        .description("description")
+        .beginEnrollmentDateTime(LocalDateTime.of(2023, 1, 18, 13, 41))
+        .closeEnrollmentDateTime(LocalDateTime.of(2023, 1, 19, 13, 41))
+        .beginEventDateTime(LocalDateTime.of(2023, 1, 20, 13, 41))
+        .endEventDateTime(LocalDateTime.of(2023, 1, 21, 13, 41))
+        .basePrice(200)
+        .maxPrice(300)
+        .limitOfEnrollment(100)
+        .location("gangnam")
+        .eventStatus(EventStatus.DRAFT)
         .build();
     event.update();
     this.eventRepository.save(event);
